@@ -9,6 +9,9 @@ class DataBase:
 
     def __create_table(self):
         sql = self.connect_db()
+        sql['cursor'].execute('''
+            
+        ''')
         self.close(sql['cursor'], sql['connect'])
         
     def connect_db(self):
