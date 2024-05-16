@@ -47,7 +47,6 @@ class TelegramBot(DataBase):
         self.bot.polling()
 
 
-
 TelegramBot(
     db_name = 'tg.db',
     token = '7126834538:AAEVIDL2KhEVSkVDNwiwNOcXNojXGqUI9Jw'
