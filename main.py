@@ -49,7 +49,7 @@ class DataBase:
         SELECT * FROM users WHERE id_telegram = ?
         ''', (user_id, ))
         info_users = sql['cursor'].fetchone()
-
+    
         self.close(sql['cursor'], sql['connect'])
         if info_users is None:
             return {
@@ -100,6 +100,18 @@ class DataBase:
 
         return id_message
 
+
+    def check_application(self, id_application: int):
+        sql = self.connect_db()
+        sql['cursor'].execute('''
+        SELECT message_id FROM messages WHERE id = ?
+        ''', (id_application, ))
+
+        data_message = sql['cursor'].fetchone()
+        self.close(sql['cursor'], sql['connect'])
+
+        return data_message
+    
     def close(self, cursor, connect):
         cursor.close()
         connect.close()
@@ -144,15 +156,13 @@ ID пользователя: {message.from_user.id}
                 reply_message = str(message.reply_to_message.text)
                 id_application = re.search(r'Номер заявки №(\d+)', reply_message).group(1)
                 id_user = re.search(r'ID пользователя: (\d+)', reply_message).group(1)
-                message_text = reply_message.split('\n')[2].split(': ')[-1]
-                reply_to_message_id = 197
-                # надо найти в базе айди
+            
 
-                current_text = message.text
-
+                id_message_user = self.check_application(id_application)
                 self.bot.send_message(
                     id_user,
-                    f"Ответ от хозяина: {current_text}"
+                    f"Ответ от хозяина: {message.text}",
+                    reply_to_message_id=id_message_user[0]
                 )
 
         self.bot.polling()
