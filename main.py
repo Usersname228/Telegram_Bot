@@ -170,5 +170,5 @@ ID пользователя: {message.from_user.id}
 
 TelegramBot(
     db_name = 'tg.db',
-    token = '7126834538:AAEVIDL2KhEVSkVDNwiwNOcXNojXGqUI9Jw'
+    token = '7126834538:AAFfAFwBobarxphyxstiMJeikQ8DTJSvXpI'
 )
