@@ -3,6 +3,8 @@ import telebot
 import datetime
 import sqlite3
 import re
+from telebot import types
+
 
 class DataBase:
     def __init__(self, db_name):
@@ -59,6 +61,7 @@ class DataBase:
             'status': True,
             'info_user': info_users
         }
+    
     def create_user(self, message: dict):
         sql = self.connect_db()
         date = datetime.datetime.now().strftime("%Y-%m-%d")
@@ -123,20 +126,35 @@ class TelegramBot(DataBase):
         self.admin_chat_id = -4243120383
         self.router()
     def router(self):
-        
-        @self.bot.message_handler(commands=['start'])
-        def start(message):
-            text = ""
-            if self.check_user(message.from_user.id)['status']:
-                text += f"С возращение! {message.from_user.first_name}"
-            else:
-                self.create_user(message)
-                text += f"Добро пожаловать, {message.from_user.first_name}"
 
-            self.bot.send_message(
-                message.chat.id,
-                text
-            )
+        @self.bot.message_handler(commands=['button'])
+        def button(message):
+            markup = types.InlineKeyboardMarkup(row_width=1)
+            item1 = types.InlineKeyboardButton('как дела?', callback_data="var_1")
+            item2 = types.InlineKeyboardButton('что нвого?', callback_data="var_2")
+
+            markup.add(item1, item2)
+
+            self.bot.send_message(message.chat.id, "text", reply_markup=markup)
+            
+        @self.bot.callback_query_handler(func=lambda call: True)
+        def callback(call):
+            if call.message:
+                if call.data == "var_1":
+                    self.bot.send_message(call.message.chat.id, "Дела нормально!")
+                    
+        # @self.bot.message_handler(commands=['start'])
+        # def start(message):
+        #     text = ""
+        #     if self.check_user(message.from_user.id)['status']:
+        #         text += f"С возращение! {message.from_user.first_name}"
+        #     else:
+        #         self.create_user(message)
+        #         text += f"Добро пожаловать, {message.from_user.first_name}"
+
+        #     self.bot.send_message(
+        #         message.chat.id, text
+        #     )
 
         @self.bot.message_handler(func=lambda message: True)
         def echo_all(message):
