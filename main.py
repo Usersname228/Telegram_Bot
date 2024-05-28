@@ -125,39 +125,49 @@ class TelegramBot(DataBase):
         self.bot = telebot.TeleBot(token)
         self.admin_chat_id = -4243120383
         self.router()
+
     def router(self):
 
-        @self.bot.message_handler(commands=['button'])
-        def button(message):
-            markup = types.InlineKeyboardMarkup(row_width=1)
-            item1 = types.InlineKeyboardButton('как дела?', callback_data="var_1")
-            item2 = types.InlineKeyboardButton('что нвого?', callback_data="var_2")
+        @self.bot.message_handler(commands=['start'])
+        def start(message):
 
-            markup.add(item1, item2)
+            text = ""
 
-            self.bot.send_message(message.chat.id, "text", reply_markup=markup)
-            
+            if self.check_user(message.from_user.id)['status']:
+                text += f"С возращение! {message.from_user.first_name}"
+                markup = types.InlineKeyboardMarkup(row_width=2)
+                item1 = types.InlineKeyboardButton('Поможник', callback_data="var_1")
+                item2 = types.InlineKeyboardButton('YouTube', url="https://www.youtube.com", callback_data="var_2")
+                item3 = types.InlineKeyboardButton('Dzen.ru', url="https://dzen.ru/news", callback_data="var_3")
+                item4 = types.InlineKeyboardButton('Экономика',url="https://dzen.ru/news/rubric/quotes/0", callback_data="var_4")
+
+                markup.add(item1, item2, item3, item4)
+
+            else:
+                self.create_user(message)
+                text += f"Добро пожаловать, {message.from_user.first_name}"
+                markup = types.InlineKeyboardMarkup(row_width=2)
+                item1 = types.InlineKeyboardButton('Поможник', callback_data="var_1")
+                item2 = types.InlineKeyboardButton('YouTube', url="https://www.youtube.com", callback_data="var_2")
+                item3 = types.InlineKeyboardButton('Dzen.ru', url="https://dzen.ru/news", callback_data="var_3")
+                item4 = types.InlineKeyboardButton('Экономика',url="https://dzen.ru/news/rubric/quotes/0", callback_data="var_4")
+
+                markup.add(item1, item2, item3, item4)
+
+            self.bot.send_message(
+                message.chat.id, text, reply_markup=markup
+            )
+
         @self.bot.callback_query_handler(func=lambda call: True)
         def callback(call):
+
             if call.message:
                 if call.data == "var_1":
-                    self.bot.send_message(call.message.chat.id, "Дела нормально!")
-                    
-        # @self.bot.message_handler(commands=['start'])
-        # def start(message):
-        #     text = ""
-        #     if self.check_user(message.from_user.id)['status']:
-        #         text += f"С возращение! {message.from_user.first_name}"
-        #     else:
-        #         self.create_user(message)
-        #         text += f"Добро пожаловать, {message.from_user.first_name}"
-
-        #     self.bot.send_message(
-        #         message.chat.id, text
-        #     )
+                    self.bot.send_message(call.message.chat.id, "Времено не работает! :(")
 
         @self.bot.message_handler(func=lambda message: True)
         def echo_all(message):
+
             if message.chat.id != self.admin_chat_id:
                 id_message = self.insert_message(message)
                 self.bot.reply_to(
@@ -170,6 +180,7 @@ ID пользователя: {message.from_user.id}
 Сообщение: {message.text}
                 '''
                 self.bot.send_message(self.admin_chat_id, text)
+
             elif message.chat.id == self.admin_chat_id and message.reply_to_message != None:
                 reply_message = str(message.reply_to_message.text)
                 id_application = re.search(r'Номер заявки №(\d+)', reply_message).group(1)
